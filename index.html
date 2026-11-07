@@ -3,64 +3,113 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Is Gage Robert Lloyd Good at Deadlock Yet?</title>
+<title>Are You Deadlocked?</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 60'%3E%3Cpath d='M14 27V17a10 10 0 0 1 20 0v10' fill='none' stroke='%23e0b354' stroke-width='5'/%3E%3Crect x='4' y='26' width='40' height='32' rx='5' fill='%23e0b354'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus+SC&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Limelight&family=Playfair+Display:ital,wght@1,700&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&display=swap">
 <style>
-/* Layout: one column ledger — player plate, verdict, stat tiles, trend chart, rank chart, heroes, match log */
+/* Layout: the question, two staged verdicts, then trends, strengths and weaknesses, per-match performance, heroes, rank */
 :root{
-  --bg:#0e1613; --panel:#151f1b; --panel-2:#1b2722; --line:#2b3933;
-  --fg:#ebe4d2; --muted:#98a59d; --brass:#cfa85f; --brass-dim:#8a7140;
-  --teal:#62b4a8; --good:#86cf94; --bad:#e3826f;
-  --display:"Marcellus SC","Cormorant SC",Georgia,serif;
+  --bg:#0f0d0a; --panel:#17140f; --panel-2:#211c15; --line:#332c21;
+  --fg:#f1e8d6; --muted:#a3988a; --brass:#e0b354; --brass-dim:#8c7038;
+  --good:#3fd6a8; --bad:#ff6a4d;
+  --display:"Limelight","Cormorant SC",Georgia,serif;
+  --script:"Playfair Display",Georgia,"Times New Roman",serif;
   --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
   --data:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--body);
-  background-image:radial-gradient(1200px 500px at 50% -200px,#1d2c26 0%,transparent 70%);min-height:100vh}
-.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px;display:flex;flex-direction:column;gap:28px}
-h1,h2{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;letter-spacing:.02em}
-h2{font-size:1.25rem;color:var(--brass)}
-.label{font:600 .72rem/1 var(--data);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
-.num{font-family:var(--data);font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--body);min-height:100vh;overflow-x:hidden}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-weight:400;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-size:1.5rem;letter-spacing:.02em;color:var(--brass)}
+.label{font:600 .72rem/1.2 var(--data);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
 button,input,select{font:inherit;color:inherit}
+a{color:var(--brass)}
 :focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 
-/* Top bar */
-.top{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:end;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:20px}
-.brand{flex:1 1 360px;min-width:0}
-.brand h1{font-size:1.7rem;line-height:1.15}
-.answer{display:flex;flex-direction:column;gap:6px}
-.answer .word{font-family:var(--display);font-size:clamp(3rem,10vw,5.5rem);line-height:1;color:var(--brass);letter-spacing:.01em}
-.answer .word.bad{color:var(--bad)}
-.brand h1 span{color:var(--brass)}
-.brand p{margin:4px 0 0;color:var(--muted);font-size:.9rem}
-form.lookup{display:flex;gap:8px;flex:1 1 380px;max-width:520px}
-form.lookup input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
-form.lookup input::placeholder{color:#6f7c75}
-.btn{background:var(--brass);color:#1a1408;border:0;border-radius:6px;padding:10px 16px;font-weight:600;cursor:pointer;white-space:nowrap}
+/* The question */
+.hero{position:relative;display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center;padding-block:clamp(40px,11vh,110px) 12px;isolation:isolate}
+.hero::before{content:"";position:absolute;z-index:-1;left:50%;top:50%;width:min(860px,150vw);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;
+  background:repeating-radial-gradient(circle at center,transparent 0 38px,rgba(224,179,84,.07) 38px 39px),repeating-conic-gradient(from 0deg,rgba(224,179,84,.10) 0 .5deg,transparent .5deg 6deg);
+  -webkit-mask:radial-gradient(circle at center,#000 0,transparent 68%);mask:radial-gradient(circle at center,#000 0,transparent 68%)}
+.hero h1{font-family:var(--display);line-height:.98;display:flex;flex-direction:column;align-items:center;gap:.08em}
+.hero h1 .pre{font-size:clamp(1.5rem,5vw,2.6rem);color:var(--brass);letter-spacing:.06em}
+.hero h1 .big{font-size:clamp(3.1rem,13.2vw,8.6rem);letter-spacing:.005em}
+.hero .sub{margin:0;color:var(--muted);font-size:1.02rem;max-width:44ch}
+.hero .sub b{color:var(--fg);font-weight:600}
+.tools{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%}
+form.lookup{display:flex;gap:8px;width:100%;max-width:560px}
+form.lookup input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--brass-dim);border-radius:6px;padding:12px 14px}
+form.lookup input::placeholder{color:#857b6e}
+.btn{background:var(--brass);color:#1c1505;border:0;border-radius:6px;padding:12px 18px;font-weight:600;cursor:pointer;white-space:nowrap}
 .btn:hover{filter:brightness(1.08)}
-.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line);padding:10px 16px}
 .btn.ghost:hover{border-color:var(--brass-dim)}
 .btn:disabled{opacity:.5;cursor:default}
-.friends{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:-12px}
+.linkbtn{background:none;border:0;padding:0;color:var(--brass);cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-size:.92rem}
+.friends{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
 .chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 12px;font-size:.85rem;cursor:pointer}
 .chip.active{border-color:var(--brass)}
 .chip .x{border:0;background:none;color:var(--muted);cursor:pointer;padding:0 4px;font-size:1rem;line-height:1}
 .chip .x:hover{color:var(--bad)}
+/* Once there's an answer the lookup moves out of the way, so the question sits directly above it */
+.has-result .hero{padding-block:0;gap:14px}
+.has-result .tools{order:-1;flex-direction:row;flex-wrap:wrap;gap:10px 16px;justify-content:space-between}
+.has-result form.lookup{max-width:400px;margin-left:auto;order:2}
+.has-result form.lookup input,.has-result form.lookup .btn{padding-block:8px}
+.has-result .friends{justify-content:flex-start;flex:1 1 300px}
+.has-result #demoBtn{display:none}
+.has-result .hero h1{margin-top:clamp(12px,4vh,36px)}
 
 .notice{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--brass);border-radius:6px;padding:12px 14px;font-size:.9rem}
 .notice.err{border-left-color:var(--bad)}
 
+/* The verdicts */
+.verdicts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border-block:1px solid var(--line)}
+.v{background:var(--bg);padding:22px 20px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;--tone:var(--muted)}
+.v.yes{--tone:var(--bad)} .v.no{--tone:var(--good)}
+.v .q{font:italic 700 clamp(1.9rem,5vw,3rem)/1.1 var(--script);color:var(--brass);position:relative;padding-bottom:12px}
+.v .q::after{content:"";position:absolute;left:50%;bottom:0;width:64%;height:2px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,var(--brass) 25%,var(--brass) 75%,transparent)}
+.v .a{display:flex;align-items:center;justify-content:center;gap:clamp(10px,2vw,18px);color:var(--tone);margin-top:8px}
+.v .word{font:400 clamp(4.4rem,13vw,8rem)/1 var(--display)}
+.v .why{margin:6px 0 0;font-size:.98rem;max-width:38ch;text-wrap:balance}
+.lock{width:clamp(44px,7vw,68px);height:auto;flex:none;overflow:visible}
+.lock .shackle{fill:none;stroke:currentColor;stroke-width:5;stroke-linecap:round;transform-box:view-box;transform-origin:34px 27px}
+.lock .body{fill:currentColor}
+.lock .hole{fill:var(--bg)}
+.lock.open .shackle{transform:translateY(-7px) rotate(26deg)}
+.lock.unknown .shackle{transform:translateY(-4px)}
+.judged{font-size:.88rem;color:var(--muted)}
+.judged summary{cursor:pointer;color:var(--brass);width:max-content;max-width:100%}
+.judged p{margin:8px 0 0;max-width:80ch}
+
+/* Staged reveal: plays once per lookup. Everything is visible at rest, so reduced motion needs no special case */
+@media (prefers-reduced-motion:no-preference){
+  .reveal .v.second{--d:1.45s}
+  .reveal .v .q{animation:rise .5s calc(var(--d,0s) + .2s) both}
+  .reveal .v .a{animation:stamp .4s calc(var(--d,0s) + .85s) cubic-bezier(.2,1.3,.4,1) both}
+  .reveal .v .why{animation:fade .4s calc(var(--d,0s) + 1.15s) both}
+  .reveal .lock.shut .shackle{animation:shut .3s calc(var(--d,0s) + 1.05s) both}
+  .reveal .lock.open .shackle{animation:spring .35s calc(var(--d,0s) + 1.05s) both}
+  .reveal .below,.reveal .judged{animation:fade .6s 3s both}
+}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes fade{from{opacity:0}}
+@keyframes stamp{from{opacity:0;transform:scale(1.7)}}
+@keyframes shut{from{transform:translateY(-7px)}}
+@keyframes spring{from{transform:none}}
+
 /* Player plate */
+.below{display:flex;flex-direction:column;gap:36px}
 .plate{display:flex;flex-wrap:wrap;gap:20px;align-items:center}
 .avatar{width:72px;height:72px;border-radius:8px;border:1px solid var(--brass-dim);background:var(--panel-2);object-fit:cover;flex:none}
 .who{flex:1 1 260px;min-width:0}
-.who h2{font-size:1.7rem;color:var(--fg);overflow-wrap:anywhere}
+.who h2{font:600 1.5rem/1.2 var(--body);letter-spacing:0;color:var(--fg);overflow-wrap:anywhere}
 .who .meta{color:var(--muted);font-size:.9rem;display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:2px}
 .rank{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 14px 8px 8px}
 .rank img{width:52px;height:52px;object-fit:contain}
@@ -68,22 +117,47 @@ form.lookup input::placeholder{color:#6f7c75}
 .since{font-size:.9rem;color:var(--muted)}
 .since b{color:var(--fg);font-weight:600}
 
-/* Verdict + tiles */
-.verdict{font-family:var(--display);font-size:1.35rem;line-height:1.35;text-wrap:balance}
-.verdict em{font-style:normal;color:var(--brass)}
-.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.controls select{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
-.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.tile{background:var(--panel);padding:14px 16px;display:flex;flex-direction:column;gap:6px}
-.tile .v{font:600 1.8rem/1 var(--data);font-variant-numeric:tabular-nums}
-.tile .was{font-size:.8rem;color:var(--muted)}
-.delta{font:600 .85rem/1 var(--data);letter-spacing:.02em}
-.delta.good{color:var(--good)} .delta.bad{color:var(--bad)} .delta.flat{color:var(--muted)}
-@media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
-
-/* Panels */
+/* Trends */
 section.block{display:flex;flex-direction:column;gap:14px}
 .head{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:baseline;justify-content:space-between}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.controls select{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.areas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.area{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.area.good{border-top-color:var(--good)} .area.bad{border-top-color:var(--bad)}
+.area .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.area h3{font:600 1.05rem/1.2 var(--body)}
+.area svg{display:block;width:100%;height:auto}
+.area .lines{display:flex;justify-content:space-between;gap:4px 10px;flex-wrap:wrap}
+.tag{font:600 .85rem/1 var(--data);letter-spacing:.02em;white-space:nowrap}
+.tag.good,.delta.good{color:var(--good)} .tag.bad,.delta.bad{color:var(--bad)} .tag.flat,.delta.flat{color:var(--muted)}
+.delta{font:600 .85rem/1.2 var(--data);letter-spacing:.02em}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.tile{background:var(--panel);padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.tile .val{font:600 1.8rem/1 var(--data);font-variant-numeric:tabular-nums}
+.tile .was{font-size:.8rem;color:var(--muted)}
+@media (max-width:820px){.tiles,.areas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.verdicts{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:460px){.areas{grid-template-columns:minmax(0,1fr)}form.lookup{flex-wrap:wrap}form.lookup input{flex-basis:100%}form.lookup .btn{flex:1}.has-result form.lookup{max-width:none}}
+
+/* Strengths and weaknesses */
+.sw{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.sw{grid-template-columns:minmax(0,1fr)}}
+.swcol{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.swcol h3{font:italic 700 1.4rem/1.1 var(--script);color:var(--fg)}
+.swrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:baseline}
+.swrow .n{font-weight:600}
+.swrow .c{font:600 .95rem/1 var(--data);font-variant-numeric:tabular-nums}
+.swrow .d{grid-column:1/-1;color:var(--muted);font-size:.82rem}
+.swrow .bar{grid-column:1/-1;height:6px;border-radius:3px;background:var(--panel-2);overflow:hidden;margin-top:4px}
+.swrow .bar i{display:block;height:100%;border-radius:0 3px 3px 0}
+.swcol.good .bar i{background:var(--good)} .swcol.bad .bar i{background:var(--bad)}
+.swhero{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);padding-top:12px;font-size:.92rem}
+.swhero img,.swhero .ph{width:34px;height:34px;border-radius:4px;flex:none;object-fit:cover}
+.swhero .d{color:var(--muted);font-size:.82rem;display:block}
+.muted{color:var(--muted);font-size:.9rem;margin:0}
+
+/* Charts */
 .tabs{display:flex;flex-wrap:wrap;gap:4px}
 .tab{background:none;border:1px solid transparent;border-radius:999px;padding:4px 12px;color:var(--muted);cursor:pointer;font-size:.88rem}
 .tab:hover{color:var(--fg)}
@@ -92,8 +166,11 @@ section.block{display:flex;flex-direction:column;gap:14px}
 .chart svg{display:block;width:100%;height:auto}
 .chart .tip{position:absolute;pointer-events:none;background:var(--panel-2);border:1px solid var(--brass-dim);border-radius:6px;padding:8px 10px;font-size:.82rem;line-height:1.35;white-space:nowrap;transform:translate(-50%,-100%);z-index:2}
 .chart .tip b{color:var(--brass);font-weight:600}
-.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.82rem;color:var(--muted);padding:0 10px 6px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.82rem;color:var(--muted);padding:4px 10px 6px}
 .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.legend i.sq{width:10px;height:10px;border-radius:2px}
+.legend i.dot{width:8px;height:8px;border-radius:50%;background:var(--fg)}
+.legend i.ring{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--muted);background:none}
 .empty{color:var(--muted);font-size:.9rem;padding:24px 12px;text-align:center}
 
 /* Tables */
@@ -103,18 +180,24 @@ th{font:600 .7rem/1 var(--data);text-transform:uppercase;letter-spacing:.12em;co
 td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:right;font-family:var(--data);font-size:1rem;font-variant-numeric:tabular-nums;white-space:nowrap}
 tr:last-child td{border-bottom:0}
 th:first-child,td:first-child{text-align:left}
-td.hero{font-family:var(--body);font-size:.92rem;display:flex;align-items:center;gap:10px}
-td.hero .ph{width:30px;height:30px;border-radius:4px;background:var(--panel-2);border:1px solid var(--line);display:inline-grid;place-items:center;font-family:var(--display);color:var(--brass);flex:none}
-td.hero img{width:30px;height:30px;border-radius:4px;object-fit:cover;background:var(--panel-2);flex:none}
+td.hero-c{font-family:var(--body);font-size:.92rem;display:flex;align-items:center;gap:10px}
+.ph{width:30px;height:30px;border-radius:4px;background:var(--panel-2);border:1px solid var(--line);display:inline-grid;place-items:center;font-family:var(--display);color:var(--brass);flex:none}
+td.hero-c img{width:30px;height:30px;border-radius:4px;object-fit:cover;background:var(--panel-2);flex:none}
+td.note{color:var(--muted);font-size:.92rem}
+td.note b{font-weight:600;color:var(--fg)}
 .wl{display:inline-block;min-width:22px;text-align:center;border-radius:4px;padding:2px 6px;font-weight:600;font-size:.82rem}
-.wl.w{background:rgba(134,207,148,.15);color:var(--good)} .wl.l{background:rgba(227,130,111,.14);color:var(--bad)}
+.wl.w{background:rgba(63,214,168,.14);color:var(--good)} .wl.l{background:rgba(255,106,77,.14);color:var(--bad)}
+.sc{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end}
+.sc .meter{position:relative;width:52px;height:6px;border-radius:3px;background:var(--panel-2)}
+.sc .meter::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--muted)}
+.sc .meter i{position:absolute;top:0;bottom:0;background:var(--muted)}
+.sc .meter i.good{background:var(--good)} .sc .meter i.bad{background:var(--bad)}
 .form{display:inline-flex;gap:3px}
 .form i{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--bad)}
 .form i.w{background:var(--good)}
 .more{align-self:center}
 footer{color:var(--muted);font-size:.8rem;border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:4px}
-footer a{color:var(--brass)}
-.demo-tag{display:inline-block;font:600 .7rem/1 var(--data);letter-spacing:.12em;text-transform:uppercase;color:#1a1408;background:var(--brass);border-radius:4px;padding:4px 6px;vertical-align:middle;margin-left:8px}
+.demo-tag{display:inline-block;font:600 .7rem/1 var(--data);letter-spacing:.12em;text-transform:uppercase;color:#1c1505;background:var(--brass);border-radius:4px;padding:4px 6px;vertical-align:middle;margin-left:8px}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--brass-dim);border-top-color:var(--brass);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
@@ -122,18 +205,19 @@ footer a{color:var(--brass)}
 </head>
 <body>
 <div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <h1>Is Gage Robert Lloyd good at <span>Deadlock</span> yet?</h1>
-      <p>An ongoing investigation, updated every match.</p>
+  <header class="hero">
+    <h1><span class="pre">Are you</span><span class="big">Deadlocked?</span></h1>
+    <p class="sub" id="sub"></p>
+    <div class="tools">
+      <form class="lookup" id="lookup">
+        <input id="steamInput" autocomplete="off" spellcheck="false" placeholder="SteamID64, Steam profile URL or player name" aria-label="Steam ID">
+        <button class="btn" id="goBtn" type="submit">Find out</button>
+      </form>
+      <div class="friends" id="friends" hidden></div>
+      <button class="linkbtn" id="demoBtn" type="button">See an example</button>
     </div>
-    <form class="lookup" id="lookup">
-      <input id="steamInput" autocomplete="off" spellcheck="false" placeholder="Gage's SteamID64 or Steam profile URL" aria-label="Steam ID">
-      <button class="btn" id="goBtn" type="submit">Judge</button>
-    </form>
   </header>
-  <div class="friends" id="friends" hidden></div>
-  <div id="status" hidden></div>
+  <div id="status" role="status" hidden></div>
   <main id="app" style="display:flex;flex-direction:column;gap:28px"></main>
   <footer>
     <span>Data from the community-run <a href="https://deadlock-api.com" target="_blank" rel="noopener">Deadlock API</a>. Not affiliated with Valve.</span>
@@ -144,27 +228,48 @@ footer a{color:var(--brass)}
 <script>
 "use strict";
 const API = "https://api.deadlock-api.com";
-const ASSET_BASES = ["https://assets.deadlock-api.com/v2", API + "/v1/assets"];
+const ASSET_BASES = [API + "/v1/assets"];
 const STEAM_OFFSET = 76561197960265728n;
 const TIERS = ["Obscurus","Initiate","Seeker","Alchemist","Arcanist","Ritualist","Emissary","Archon","Oracle","Phantom","Ascendant","Eternus"];
 const FALLBACK_HEROES = {1:"Infernus",2:"Seven",3:"Vindicta",4:"Lady Geist",6:"Abrams",7:"Wraith",8:"McGinnis",10:"Paradox",11:"Dynamo",12:"Kelvin",13:"Haze",14:"Holliday",15:"Bebop",16:"Calico",17:"Grey Talon",18:"Mo & Krill",19:"Shiv",20:"Ivy",25:"Warden",27:"Yamato",31:"Lash",35:"Viscous",50:"Pocket",52:"Mirage",58:"Vyper",60:"Sinclair"};
 
+/* Verdict tuning. A move only counts when it clears normal game-to-game noise. */
+const T_CRIT = 1.645;      // t-statistic needed to call a move real: about 95% one-sided confidence
+const MIN_GAMES = 10;      // fewer games than this and neither question gets an answer
+const MIN_TREND_PTS = 3;   // Overall also needs the trend line to move this many score points, since long histories make tiny slopes "significant"
+const SCORE_SD = 15;       // match score spread: 50 is your average, 65 is one standard deviation above it
+const BENCH_GAMES = 50;    // recent games compared against rank-bracket averages
+const BENCH_GAP = 0.1;     // gap from the bracket, in single-match standard deviations, that counts as a strength or weakness
+
 const METRICS = [
-  {key:"win",   label:"Win rate",        better:"up",   fmt:v=>Math.round(v*100)+"%", calc:ms=>avg(ms.map(m=>m.win?1:0))},
-  {key:"kda",   label:"KDA",             better:"up",   fmt:v=>v.toFixed(2), calc:ms=>{const k=sum(ms,"kills"),d=sum(ms,"deaths"),a=sum(ms,"assists");return (k+a)/Math.max(1,d);}},
-  {key:"spm",   label:"Souls / min",     better:"up",   fmt:v=>Math.round(v).toLocaleString(), calc:ms=>sum(ms,"souls")/Math.max(1e-9,sum(ms,"mins"))},
-  {key:"lhpm",  label:"Last hits / min", better:"up",   fmt:v=>v.toFixed(1), calc:ms=>sum(ms,"lastHits")/Math.max(1e-9,sum(ms,"mins"))},
-  {key:"kills", label:"Kills / game",    better:"up",   fmt:v=>v.toFixed(1), calc:ms=>avg(ms.map(m=>m.kills))},
-  {key:"deaths",label:"Deaths / game",   better:"down", fmt:v=>v.toFixed(1), calc:ms=>avg(ms.map(m=>m.deaths))},
-  {key:"assists",label:"Assists / game", better:"up",   fmt:v=>v.toFixed(1), calc:ms=>avg(ms.map(m=>m.assists))},
-  {key:"denies",label:"Denies / game",   better:"up",   fmt:v=>v.toFixed(1), calc:ms=>avg(ms.map(m=>m.denies))},
+  {key:"win",   label:"Win rate",        short:"Win rate",   better:"up",   fmt:v=>Math.round(v*100)+"%", one:m=>m.win?1:0, calc:ms=>avg(ms.map(m=>m.win?1:0))},
+  {key:"kda",   label:"KDA",             short:"KDA",        better:"up",   fmt:v=>v.toFixed(2), one:m=>(m.kills+m.assists)/Math.max(1,m.deaths), calc:ms=>{const k=sum(ms,"kills"),d=sum(ms,"deaths"),a=sum(ms,"assists");return (k+a)/Math.max(1,d);}},
+  {key:"spm",   label:"Souls / min",     short:"Souls/min",  better:"up",   fmt:v=>Math.round(v).toLocaleString(), one:m=>m.souls/m.mins, calc:ms=>sum(ms,"souls")/Math.max(1e-9,sum(ms,"mins"))},
+  {key:"lhpm",  label:"Last hits / min", short:"Last hits/min", better:"up", fmt:v=>v.toFixed(1), one:m=>m.lastHits/m.mins, calc:ms=>sum(ms,"lastHits")/Math.max(1e-9,sum(ms,"mins"))},
+  {key:"kills", label:"Kills / game",    short:"Kills",      better:"up",   fmt:v=>v.toFixed(1), one:m=>m.kills, calc:ms=>avg(ms.map(m=>m.kills))},
+  {key:"deaths",label:"Deaths / game",   short:"Deaths",     better:"down", fmt:v=>v.toFixed(1), one:m=>m.deaths, calc:ms=>avg(ms.map(m=>m.deaths))},
+  {key:"assists",label:"Assists / game", short:"Assists",    better:"up",   fmt:v=>v.toFixed(1), one:m=>m.assists, calc:ms=>avg(ms.map(m=>m.assists))},
+  {key:"denies",label:"Denies / game",   short:"Denies",     better:"up",   fmt:v=>v.toFixed(1), one:m=>m.denies, calc:ms=>avg(ms.map(m=>m.denies))},
 ];
 const M = Object.fromEntries(METRICS.map(m=>[m.key,m]));
+// Match score isn't a raw stat, so it sits outside METRICS but can be charted like one.
+M.score = {key:"score",label:"Match score",fmt:v=>Math.round(v).toString(),one:m=>m.score,calc:ms=>avg(ms.map(m=>m.score))};
+
+// Each area counts equally in the match score, however many stats it holds.
+const AREAS = [
+  {key:"winning", label:"Winning",  detail:"Win rate",          metrics:["win"]},
+  {key:"fighting",label:"Fighting", detail:"Kills and KDA",     metrics:["kills","kda"]},
+  {key:"survival",label:"Survival", detail:"Deaths",            metrics:["deaths"]},
+  {key:"economy", label:"Economy",  detail:"Souls per minute",  metrics:["spm"]},
+  {key:"farming", label:"Farming",  detail:"Last hits and denies", metrics:["lhpm","denies"]},
+  {key:"teamplay",label:"Teamplay", detail:"Assists",           metrics:["assists"]},
+];
 
 const state = {
   heroes:{}, ranks:{}, assetsLoaded:false,
-  player:null, matches:[], mmr:[], demo:false,
-  windowN:20, trendMetric:"kda", shown:20, includeBrawl:false
+  player:null, matches:[], rankHist:[], bench:null, demo:false,
+  windowN:20, trendMetric:"score", shown:20, includeBrawl:false,
+  reveal:false, revealUntil:0
 };
 
 /* ---------- helpers ---------- */
@@ -177,6 +282,8 @@ const fmtDate = t => new Date(t*1000).toLocaleDateString(undefined,{month:"short
 const fmtDateY = t => new Date(t*1000).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});
 function ago(t){const s=Date.now()/1000-t;if(s<3600)return Math.max(1,Math.round(s/60))+"m ago";if(s<86400)return Math.round(s/3600)+"h ago";if(s<86400*30)return Math.round(s/86400)+"d ago";return fmtDate(t);}
 function dur(s){const m=Math.floor(s/60);return m+":"+String(Math.floor(s%60)).padStart(2,"0");}
+const plural = (n,w) => `${n.toLocaleString()} ${w}${n===1?"":"s"}`;
+const signed = v => (v>0?"+":v<0?"−":"")+Math.abs(v);
 
 async function getJSON(url){
   const r = await fetch(url,{headers:{Accept:"application/json"}});
@@ -205,6 +312,98 @@ function rankImg(tier,sub){
   const pick=re=>keys.find(k=>re.test(k)&&!/webp/i.test(k))||keys.find(k=>re.test(k));
   const k = (sub && pick(new RegExp("^small.*subrank"+sub+"$"))) || (sub && pick(new RegExp("subrank"+sub+"$"))) || pick(/^small/) || keys[0];
   return k?imgs[k]:"";
+}
+
+/* ---------- statistics ---------- */
+function meanSd(a){
+  const n=a.length; if(!n)return {mean:0,sd:0};
+  const mean=avg(a);
+  return {mean,sd:n>1?Math.sqrt(a.reduce((s,x)=>s+(x-mean)**2,0)/(n-1)):0};
+}
+// Welch's t: how far apart two groups of games are, relative to how noisy they are.
+function welchT(a,b){
+  if(!a.length||!b.length)return 0;
+  const A=meanSd(a),B=meanSd(b), se=Math.sqrt(A.sd**2/a.length+B.sd**2/b.length);
+  return se>0?(A.mean-B.mean)/se:0;
+}
+// Least-squares line through a series, with its fitted start, fitted end and slope t-statistic.
+function fitLine(ys){
+  const n=ys.length;
+  if(n<3)return {start:ys[0]??0,end:ys[n-1]??0,t:0};
+  const xb=(n-1)/2, yb=avg(ys);
+  let sxx=0,sxy=0;
+  ys.forEach((y,i)=>{sxx+=(i-xb)**2;sxy+=(i-xb)*(y-yb);});
+  const b=sxy/sxx, a=yb-b*xb;
+  let sse=0; ys.forEach((y,i)=>{sse+=(y-a-b*i)**2;});
+  const se=Math.sqrt(sse/(n-2)/sxx);
+  return {start:a,end:a+b*(n-1),t:se>0?b/se:0};
+}
+const moveClass = t => t>=T_CRIT?"good":t<=-T_CRIT?"bad":"flat";
+
+function splitWindows(ms,n){
+  if(ms.length>=2*n) return {recent:ms.slice(-n), prior:ms.slice(-2*n,-n), n, pn:n};
+  const h=Math.floor(ms.length/2); return {recent:ms.slice(h), prior:ms.slice(0,h), n:ms.length-h, pn:h};
+}
+
+/* Scores every match against the player's own history, writing m.score, m.best and m.worst onto each match. */
+function analyse(ms){
+  const base={};
+  for(const m of METRICS){const vals=ms.map(m.one);base[m.key]={vals,...meanSd(vals),sign:m.better==="up"?1:-1};}
+  const zOf=(k,i)=>{const b=base[k];return b.sd?Math.max(-3,Math.min(3,(b.vals[i]-b.mean)/b.sd*b.sign)):0;};
+  const areaZ=AREAS.map(a=>ms.map((_,i)=>avg(a.metrics.map(k=>zOf(k,i)))));
+  const raw=ms.map((_,i)=>avg(areaZ.map(z=>z[i])));
+  const r=meanSd(raw);
+  ms.forEach((m,i)=>{
+    m.score=Math.max(0,Math.min(100,50+SCORE_SD*(r.sd?(raw[i]-r.mean)/r.sd:0)));
+    let best=null,worst=null;
+    for(const {key} of METRICS){
+      if(key==="win")continue;
+      const z=zOf(key,i);
+      if(z>=.5&&(!best||z>best.z))best={k:key,z,val:base[key].vals[i]};
+      if(z<=-.5&&(!worst||z<worst.z))worst={k:key,z,val:base[key].vals[i]};
+    }
+    m.best=best; m.worst=worst;
+  });
+  return {base,areaSeries:areaZ.map(z=>z.map(v=>50+SCORE_SD*v))};
+}
+
+/* Recent and all-games movement for one per-match series. Positive t always means "getting better". */
+function movement(vals,sign,n,pn){
+  const rec=vals.slice(-n), pri=pn?vals.slice(-n-pn,-n):[];
+  const fit=fitLine(vals);
+  return {now:avg(rec),before:pri.length?avg(pri):null,recentT:welchT(rec,pri)*sign,fit,overallT:fit.t*sign};
+}
+
+function judge(ms,a,n,pn){
+  if(ms.length<MIN_GAMES){
+    const why=ms.length?`Only ${plural(ms.length,"game")} on record. Need at least ${MIN_GAMES} to tell.`:"No games on record yet.";
+    return {recent:{answer:"?",why},overall:{answer:"?",why}};
+  }
+  const moves=METRICS.map(m=>movement(a.base[m.key].vals,a.base[m.key].sign,n,pn));
+  const count=key=>{
+    const down=moves.filter(x=>x[key]<=-T_CRIT).length, up=moves.filter(x=>x[key]>=T_CRIT).length;
+    return `${plural(down,"stat")} falling, ${up} rising.`;
+  };
+  const s=movement(ms.map(m=>m.score),1,n,pn);
+  const now=Math.round(s.now), was=Math.round(s.before), from=Math.round(s.fit.start), to=Math.round(s.fit.end);
+  const recentYes=s.recentT<=-T_CRIT;
+  const overallYes=s.overallT<=-T_CRIT&&s.fit.start-s.fit.end>=MIN_TREND_PTS;
+  const games=`your last ${plural(n,"game")}`;
+  let recentWhy;
+  if(recentYes) recentWhy=`Match score fell to ${now} from ${was} over ${games}.`;
+  else if(s.recentT>=T_CRIT) recentWhy=`Match score climbed to ${now} from ${was} over ${games}.`;
+  else if(now<was) recentWhy=`Match score dipped to ${now} from ${was} over ${games}, within your normal swings.`;
+  else recentWhy=`Match score held at ${now} against ${was} over ${games}.`;
+  const span=`across all ${plural(ms.length,"game")}`;
+  let overallWhy;
+  if(overallYes) overallWhy=`Your trend line fell from ${from} to ${to} ${span}.`;
+  else if(to>from&&s.overallT>=T_CRIT) overallWhy=`Your trend line climbed from ${from} to ${to} ${span}.`;
+  else if(to<from) overallWhy=`Your trend line eased from ${from} to ${to} ${span}, too little to call a decline.`;
+  else overallWhy=`Your trend line held from ${from} to ${to} ${span}.`;
+  return {
+    recent:{answer:recentYes?"YES":"NO",why:`${recentWhy} ${count("recentT")}`},
+    overall:{answer:overallYes?"YES":"NO",why:`${overallWhy} ${count("overallT")}`}
+  };
 }
 
 /* ---------- assets ---------- */
@@ -265,31 +464,31 @@ function normalize(raw){
       kills:r.player_kills||0, deaths:r.player_deaths||0, assists:r.player_assists||0,
       souls:r.net_worth||0, lastHits:r.last_hits||0, denies:r.denies||0,
       secs, mins, abandoned:(r.abandoned_time_s||0)>0,
-      brawl: r.brawl_score_team0!=null || r.brawl_score_team1!=null
+      // game_mode 4 is Street Brawl. Some normal matches also carry brawl scores, so those only count when the mode is missing.
+      brawl: r.game_mode!=null ? r.game_mode===4 : (r.brawl_score_team0!=null || r.brawl_score_team1!=null),
+      // match_mode 1 is unranked and 4 is ranked. Private lobbies, bots and the like would skew the verdict.
+      practice: r.match_mode!=null && r.match_mode!==1 && r.match_mode!==4,
+      badge: r.ranked_display_badge||0
     });
   }
   out.sort((a,b)=>a.t-b.t||a.id-b.id);
   return out;
 }
-function normalizeMMR(raw){
-  if(!Array.isArray(raw))return [];
-  return raw.map(r=>{
-    const score = r.player_score ?? r.mmr ?? r.score;
-    let tier=r.division, sub=r.division_tier;
-    if(tier==null && typeof r.rank==="number" && r.rank>=10){tier=Math.floor(r.rank/10);sub=r.rank%10;}
-    return {t:r.start_time||r.match_start_time||0, score, tier, sub, id:r.match_id};
-  }).filter(r=>typeof r.score==="number"&&r.t).sort((a,b)=>a.t-b.t);
+function rankHistory(ms){
+  return ms.filter(m=>m.badge>0).map(m=>{
+    const tier=Math.floor(m.badge/10), sub=m.badge%10;
+    return {t:m.t,tier,sub,idx:tier*6+Math.max(0,sub-1)};
+  });
 }
 
 async function loadPlayer(accountId,{force=false}={}){
   setStatus(`<span class="spin"></span>Loading match history for account ${accountId}…`);
   const histUrl = API+`/v1/players/${accountId}/match-history`;
   const pHist = (force ? getJSON(histUrl+"?force_refetch=true").catch(()=>getJSON(histUrl)) : getJSON(histUrl));
-  const [hist,rank,prof,mmr] = await Promise.allSettled([
+  const [hist,rank,prof] = await Promise.allSettled([
     pHist,
     getJSON(API+`/v1/players/${accountId}/rank`),
     getJSON(API+`/v1/players/steam?account_ids=${accountId}`),
-    getJSON(API+`/v1/players/${accountId}/mmr-history`),
     ensureAssets()
   ]);
   if(hist.status!=="fulfilled"){
@@ -311,15 +510,64 @@ async function loadPlayer(accountId,{force=false}={}){
     sub: r?.subrank ?? (r?.badge ? r.badge%10 : null)
   };
   state.matches = normalize(hist.value);
-  state.mmr = mmr.status==="fulfilled" ? normalizeMMR(mmr.value) : [];
+  state.rankHist = rankHistory(state.matches);
+  state.bench = null;
   state.shown=20;
+  state.reveal=!force;
   rememberFriend(accountId,state.player.name);
   snapshot();
   setStatus(null);
   render();
+  loadBench(accountId);
 }
 
-/* ---------- saved friends + snapshots ---------- */
+/* ---------- rank-bracket benchmarks ---------- */
+function benchGames(){return state.matches.filter(m=>!m.practice&&!m.brawl).slice(-BENCH_GAMES);}
+async function loadBench(accountId){
+  const ids=[...new Set(benchGames().map(m=>m.hero))];
+  if(!ids.length){state.bench={failed:true};return;}
+  const tier=state.player.tier;
+  let url=API+`/v1/analytics/player-stats/metrics?bucket=hero&hero_ids=${ids.join(",")}`;
+  if(tier) url+=`&min_average_badge=${tier*10}&max_average_badge=${Math.min(116,tier*10+9)}`;
+  let bench;
+  try{
+    const rows=await getJSON(url), byHero={};
+    for(const row of rows) byHero[row.bucket]=row;
+    bench={rows:byHero};
+  }catch(e){bench={failed:true};}
+  if(state.demo||state.player?.accountId!==accountId)return;
+  state.bench=bench;
+  fillStrengths();
+}
+// One hero's bracket averages, in the same units the page uses for that metric.
+function benchFor(row){
+  const mins=row.net_worth.avg/Math.max(1,row.net_worth_per_min.avg);
+  return {
+    win:{avg:.5,std:.5},
+    // Pooled like the player's own KDA, because the API's kda field averages per-match ratios and reads much higher.
+    kda:{avg:(row.kills.avg+row.assists.avg)/Math.max(1e-9,row.deaths.avg),std:row.kda.std},
+    spm:row.net_worth_per_min,
+    lhpm:{avg:row.last_hits.avg/mins,std:row.last_hits.std/mins},
+    kills:row.kills, deaths:row.deaths, assists:row.assists, denies:row.denies
+  };
+}
+function compareToBench(){
+  const rows=state.bench?.rows; if(!rows)return null;
+  const games=benchGames().filter(m=>rows[m.hero]);
+  if(games.length<MIN_GAMES)return null;
+  const per={};
+  for(const m of games) per[m.hero]??=benchFor(rows[m.hero]);
+  const mix=(k,f)=>avg(games.map(m=>per[m.hero][k][f]));
+  const out=METRICS.map(m=>{
+    const you=m.calc(games), bench=mix(m.key,"avg"), std=mix(m.key,"std");
+    return {m,you,bench,gap:std?(you-bench)/std*(m.better==="up"?1:-1):0};
+  });
+  return {n:games.length,
+    strengths:out.filter(x=>x.gap>=BENCH_GAP).sort((a,b)=>b.gap-a.gap).slice(0,4),
+    weaknesses:out.filter(x=>x.gap<=-BENCH_GAP).sort((a,b)=>a.gap-b.gap).slice(0,4)};
+}
+
+/* ---------- saved lookups + snapshots ---------- */
 function friends(){return load("dlp.friends",[]);}
 function rememberFriend(id,name){
   const f=friends().filter(x=>x.id!==id); f.unshift({id,name}); store("dlp.friends",f.slice(0,12)); store("dlp.last",id); renderFriends();
@@ -344,34 +592,119 @@ function setStatus(html,err){
 function renderFriends(){
   const el=document.getElementById("friends"), f=friends();
   el.hidden=!f.length;
-  el.innerHTML=f.length?`<span class="label">Tracked</span>`+f.map(x=>
-    `<span class="chip${state.player&&!state.demo&&state.player.accountId===x.id?" active":""}" data-id="${x.id}" role="button" tabindex="0">${esc(x.name)}<button class="x" data-forget="${x.id}" aria-label="Stop tracking ${esc(x.name)}">×</button></span>`).join(""):"";
+  el.innerHTML=f.length?`<span class="label">Recent</span>`+f.map(x=>
+    `<span class="chip${state.player&&!state.demo&&state.player.accountId===x.id?" active":""}" data-id="${x.id}" role="button" tabindex="0">${esc(x.name)}<button class="x" data-forget="${x.id}" aria-label="Remove ${esc(x.name)}">×</button></span>`).join(""):"";
 }
 
-function activeMatches(){return state.matches.filter(m=>state.includeBrawl||!m.brawl);}
+function activeMatches(){return state.matches.filter(m=>!m.practice&&(state.includeBrawl||!m.brawl));}
 
-function deltaHTML(metric,now,before){
+function changeText(metric,from,to){
+  if(metric.key==="win"){const d=Math.round((to-from)*100);return signed(d)+" pts";}
+  if(!from)return "";
+  const d=Math.round((to-from)/Math.abs(from)*100);
+  return signed(d)+"%";
+}
+const arrow = (from,to) => to>from?"▲":to<from?"▼":"■";
+// Colour follows the significance test, so a tile only lights up when it counts towards the verdict.
+function deltaHTML(metric,now,before,t){
   if(before==null||!isFinite(before)||!isFinite(now))return `<span class="delta flat">no earlier data</span>`;
-  let diff, txt;
-  if(metric.key==="win"){diff=(now-before)*100;txt=(diff>=0?"+":"")+diff.toFixed(0)+" pts";}
-  else{diff=before?((now-before)/Math.abs(before))*100:0;txt=(diff>=0?"+":"")+diff.toFixed(0)+"%";}
-  const thr = metric.key==="win"?2:3;
-  if(Math.abs(diff)<thr) return `<span class="delta flat">— steady</span>`;
-  const improved = metric.better==="up" ? diff>0 : diff<0;
-  return `<span class="delta ${improved?"good":"bad"}">${diff>0?"▲":"▼"} ${txt}</span>`;
+  return `<span class="delta ${moveClass(t)}">${arrow(before,now)} ${changeText(metric,before,now)}</span>`;
 }
 
-function splitWindows(ms,n){
-  if(ms.length>=2*n) return {recent:ms.slice(-n), prior:ms.slice(-2*n,-n), n, pn:n};
-  const h=Math.floor(ms.length/2); return {recent:ms.slice(h), prior:ms.slice(0,h), n:ms.length-h, pn:h};
+const LOCK_PATHS=`<path class="shackle" d="M14 27V17a10 10 0 0 1 20 0v10"/><rect class="body" x="4" y="26" width="40" height="32" rx="5"/><circle class="hole" cx="24" cy="39" r="4.5"/><path class="hole" d="M21.5 41h5l1.5 9h-8z"/>`;
+function verdictCard(question,v,second){
+  const tone=v.answer==="YES"?"yes":v.answer==="NO"?"no":"";
+  const lock=v.answer==="YES"?"shut":v.answer==="NO"?"open":"unknown";
+  return `<article class="v ${tone}${second?" second":""}">
+    <h2 class="q">${question}</h2>
+    <div class="a"><svg class="lock ${lock}" viewBox="0 0 48 60" aria-hidden="true">${LOCK_PATHS}</svg><span class="word">${v.answer}</span></div>
+    <p class="why">${esc(v.why)}</p>
+  </article>`;
+}
+
+function sparkline(vals,cls){
+  if(vals.length<2)return "";
+  const w=rollWindow(vals.length);
+  const rolled=vals.map((_,i)=>avg(vals.slice(Math.max(0,i-w+1),i+1)));
+  const step=Math.ceil(rolled.length/48), pts=rolled.filter((_,i)=>i%step===0||i===rolled.length-1);
+  const W=220,H=44,P=6, lo=Math.min(50,...pts), hi=Math.max(50,...pts), span=(hi-lo)||1;
+  const x=i=>P+i/(pts.length-1)*(W-2*P), y=v=>P+(1-(v-lo)/span)*(H-2*P);
+  const d="M"+pts.map((v,i)=>x(i).toFixed(1)+","+y(v).toFixed(1)).join("L");
+  const colour=cls==="flat"?"var(--muted)":`var(--${cls})`;
+  return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><line x1="${P}" x2="${W-P}" y1="${y(50)}" y2="${y(50)}" stroke="var(--line)"/><path d="${d}" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${x(pts.length-1)}" cy="${y(pts.at(-1))}" r="4" fill="${colour}" stroke="var(--panel)" stroke-width="2"/></svg>`;
+}
+function areaCard(area,series,n,pn,enough){
+  const mv=movement(series,1,n,pn);
+  const cls=enough?moveClass(mv.recentT):"flat";
+  const word=!enough?"Too few games":cls==="good"?"▲ Improving":cls==="bad"?"▼ Regressing":"■ Steady";
+  const recent=mv.before==null?0:Math.round(mv.now-mv.before), all=Math.round(mv.fit.end-mv.fit.start);
+  const allCls=enough?moveClass(mv.overallT):"flat";
+  return `<div class="area ${cls}">
+    <div class="top"><h3>${area.label}</h3><span class="tag ${cls}">${word}</span></div>
+    <span class="label">${area.detail}</span>
+    ${sparkline(series,cls)}
+    <div class="lines"><span class="delta ${cls}">Recent ${signed(recent)||"0"}</span><span class="delta ${allCls}">All games ${signed(all)||"0"}</span></div>
+  </div>`;
+}
+
+function scoreHTML(v){
+  const s=Math.round(v), w=Math.abs(v-50), cls=v>=55?"good":v<=45?"bad":"";
+  return `<span class="sc"><span>${s}</span><span class="meter" aria-hidden="true"><i class="${cls}" style="left:${v>=50?50:50-w}%;width:${w}%"></i></span></span>`;
+}
+function noteHTML(n){return n?`<b>${M[n.k].short}</b> ${Number.isInteger(n.val)?n.val:M[n.k].fmt(n.val)}`:"—";}
+
+function bestWorstHeroes(ms){
+  const by={};
+  for(const m of ms)(by[m.hero]??=[]).push(m);
+  const floor=Math.max(5,Math.ceil(ms.length*.02));
+  const list=Object.entries(by).filter(([,l])=>l.length>=floor).map(([id,l])=>({id,games:l.length,score:M.score.calc(l),win:M.win.calc(l)})).sort((a,b)=>b.score-a.score);
+  if(list.length<2)return {};
+  return {best:list[0].score>50?list[0]:null,worst:list.at(-1).score<50?list.at(-1):null};
+}
+function swRow(x){
+  const width=Math.min(100,Math.abs(x.gap)/.6*100);
+  return `<div class="swrow"><span class="n">${x.m.label}</span><span class="c">${changeText(x.m,x.bench,x.you)}</span>
+    <span class="d">You ${x.m.fmt(x.you)}, bracket average ${x.m.fmt(x.bench)}</span>
+    <span class="bar" aria-hidden="true"><i style="width:${width}%"></i></span></div>`;
+}
+function swHero(h,word){
+  if(!h)return "";
+  return `<div class="swhero">${heroIcon(h.id)}<span>${word}: <b>${esc(heroName(h.id))}</b><span class="d">Match score ${Math.round(h.score)}, ${M.win.fmt(h.win)} wins over ${plural(h.games,"game")}</span></span></div>`;
+}
+function fillStrengths(){
+  const el=document.getElementById("strengths"); if(!el)return;
+  const cmp=compareToBench(), hs=bestWorstHeroes(activeMatches()), tier=state.player.tier;
+  const who=tier?`${rankLabel(tier,0)} players`:"all players";
+  const sub=document.getElementById("swSub");
+  if(sub) sub.textContent=cmp?`Your last ${plural(cmp.n,"game")} vs ${who} on the same heroes`:"";
+  let s,w;
+  if(cmp){
+    s=cmp.strengths.length?cmp.strengths.map(swRow).join(""):`<p class="muted">No stat is clearly above average for ${esc(who)} right now.</p>`;
+    w=cmp.weaknesses.length?cmp.weaknesses.map(swRow).join(""):`<p class="muted">No stat is clearly below average for ${esc(who)} right now.</p>`;
+  }else if(state.bench===null){
+    s=w=`<p class="muted"><span class="spin"></span>Comparing with ${esc(who)}…</p>`;
+  }else{
+    s=w=`<p class="muted">Rank comparison isn't available for this player right now.</p>`;
+  }
+  el.innerHTML=`<div class="swcol good"><h3>Strengths</h3>${s}${swHero(hs.best,"Best hero")}</div>
+    <div class="swcol bad"><h3>Weaknesses</h3>${w}${swHero(hs.worst,"Weakest hero")}</div>`;
 }
 
 function render(){
   const app=document.getElementById("app"), p=state.player;
+  const reveal=state.reveal; state.reveal=false;
+  if(reveal) state.revealUntil=Date.now()+3700;
+  app.classList.toggle("reveal",reveal);
+  document.body.classList.toggle("has-result",!!p);
   renderFriends();
-  if(!p){app.innerHTML="";return;}
-  const all=state.matches, ms=activeMatches();
-  const hasBrawl=all.some(m=>m.brawl);
+  const sub=document.getElementById("sub");
+  if(!p){
+    sub.textContent="Enter a Steam ID to see whether your Deadlock stats are slipping.";
+    app.innerHTML="";return;
+  }
+  const ms=activeMatches();
+  const hasBrawl=state.matches.some(m=>m.brawl&&!m.practice);
+  sub.innerHTML=`Asking about <b>${esc(p.name)}</b>${state.demo?`<span class="demo-tag">Example</span>`:""}`;
 
   // Player plate
   const first=p.snaps?.[0];
@@ -388,9 +721,9 @@ function render(){
   <section class="plate">
     ${p.avatar?`<img class="avatar" src="${esc(p.avatar)}" alt="" onerror="this.style.visibility='hidden'">`:`<div class="avatar" aria-hidden="true"></div>`}
     <div class="who">
-      <h2>${esc(p.name)}${state.demo?`<span class="demo-tag">Example</span>`:""}</h2>
+      <h2>${esc(p.name)}</h2>
       <div class="meta">
-        ${state.demo?"<span>Sample data. Enter Gage's Steam ID above to find out for real.</span>":`<span>Account ${p.accountId}</span><a href="${esc(p.profileUrl)}" target="_blank" rel="noopener" style="color:var(--brass)">Steam profile</a>`}
+        ${state.demo?"<span>Sample data. Enter a Steam ID above to check a real player.</span>":`<span>Account ${p.accountId}</span><a href="${esc(p.profileUrl)}" target="_blank" rel="noopener">Steam profile</a>`}
         ${p.last30!=null?`<span>${p.last30} matches in the last 30 days</span>`:""}
       </div>
       ${sinceHTML}
@@ -403,119 +736,130 @@ function render(){
   </section>`;
 
   if(!ms.length){
-    app.innerHTML=plate+`<div class="answer"><span class="label">The answer</span><span class="word bad">Can't tell. Has he even played?</span></div><div class="notice">No matches on record for this account yet. The API only has matches it has been able to fetch. Try Refresh in a while, or ask your friend to run the <a href="https://github.com/deadlock-api/deadlock-api-ingest" target="_blank" rel="noopener" style="color:var(--brass)">Deadlock API ingest tool</a>.</div>`;
+    const none=judge(ms);
+    app.innerHTML=`<section class="verdicts" aria-label="Verdict">${verdictCard("Recently?",none.recent)}${verdictCard("Overall?",none.overall,true)}</section>
+      <div class="below">${plate}<div class="notice">No matches on record for this account yet. The API only has matches it has been able to fetch. Try Refresh in a while, or run the <a href="https://github.com/deadlock-api/deadlock-api-ingest" target="_blank" rel="noopener">Deadlock API ingest tool</a>.</div></div>`;
     bindPlate(); return;
   }
 
-  // Verdict + tiles
-  const {recent,prior,n,pn}=splitWindows(ms,state.windowN);
-  const tileKeys=["win","kda","spm","lhpm","deaths","kills","assists","denies"];
-  let up=0,down=0,counted=0;
-  const tiles=tileKeys.map(k=>{
-    const m=M[k], now=m.calc(recent), before=prior.length?m.calc(prior):null;
-    if(before!=null&&isFinite(before)){counted++;
-      const thr=k==="win"?0.02:0.03, rel=k==="win"?now-before:(before?(now-before)/Math.abs(before):0);
-      if(Math.abs(rel)>=thr){((m.better==="up")===(rel>0))?up++:down++;}
-    }
-    return `<div class="tile"><span class="label">${m.label}</span><span class="v">${m.fmt(now)}</span>
-      ${deltaHTML(m,now,before)}<span class="was">${before!=null?"was "+m.fmt(before):"&nbsp;"}</span></div>`;
-  }).join("");
-  let verdict;
-  if(!prior.length) verdict=`Only ${ms.length} match${ms.length===1?"":"es"} so far. Not enough evidence to convict, but it doesn't look good.`;
-  else if(up>down) verdict=`<em>${up} of ${counted}</em> stats improved over the last ${n} matches. Don't tell him.`;
-  else if(down>up) verdict=`<em>${down} of ${counted}</em> stats got worse over the last ${n} matches. Somehow.`;
-  else verdict=`${up} stats up, ${down} down over the last ${n} matches. Perfectly mediocre.`;
-  const wrNow=M.win.calc(recent);
-  let answer, harsh=false;
-  if(!prior.length){answer="Too soon. Probably not.";}
-  else if(down>=up+3||wrNow<0.4){answer="Absolutely not.";harsh=true;}
-  else if(down>up){answer="Nope.";harsh=true;}
-  else if(up<=down+1&&wrNow<0.55){answer="Not yet.";}
-  else if(up>down+2&&wrNow>=0.5){answer="Getting there. Kind of.";}
-  else{answer="Maybe?";}
+  // Verdicts
+  const a=analyse(ms);
+  const {n,pn}=splitWindows(ms,state.windowN);
+  const verdict=judge(ms,a,n,pn);
+  const enough=ms.length>=MIN_GAMES;
+  const verdicts=`
+  <section class="verdicts" aria-label="Verdict">${verdictCard("Recently?",verdict.recent)}${verdictCard("Overall?",verdict.overall,true)}</section>
+  <details class="judged">
+    <summary>How this is judged</summary>
+    <p>Every game gets a match score, where 50 is your own average. It weighs winning, fighting, survival, economy, farming and teamplay equally. <b>Recently</b> compares your last ${plural(n,"game")} with the ${plural(pn,"game")} before them. <b>Overall</b> fits a trend line through every game on record.</p>
+    <p>YES means the drop is bigger than normal game-to-game swings would explain, at about 95% confidence. Scores are measured against your own history, so tougher lobbies after a rank climb, a switch to a support hero or a big patch can all move them.</p>
+  </details>`;
 
+  // Trends by area
   const windowOpts=[10,20,30,50].map(v=>`<option value="${v}"${v===state.windowN?" selected":""}>${v}</option>`).join("");
-  const firstT=ms[0].t,lastT=ms[ms.length-1].t;
-  const summary=`
+  const areas=`
   <section class="block">
-    <div class="answer">
-      <span class="label">The answer</span>
-      <span class="word${harsh?" bad":""}">${answer}</span>
-      <p class="verdict" style="margin:4px 0 0">${verdict}</p>
-    </div>
+    <div class="head"><h2>Where you're moving</h2></div>
     <div class="controls">
       <label class="label" for="windowSel">Compare last</label>
       <select id="windowSel">${windowOpts}</select>
-      <span class="label">${n===state.windowN?`matches with the ${pn} before`:`matches · only ${ms.length} on record, so newer ${n} vs older ${pn}`}</span>
+      <span class="label">${n===state.windowN?`games with the ${pn} before`:`games · only ${ms.length} on record, so newer ${n} vs older ${pn}`}</span>
       ${hasBrawl?`<label style="display:inline-flex;gap:6px;align-items:center;font-size:.85rem;color:var(--muted);margin-left:auto"><input type="checkbox" id="brawlChk"${state.includeBrawl?" checked":""}> Include Street Brawl</label>`:""}
     </div>
+    <div class="areas">${AREAS.map((ar,i)=>areaCard(ar,a.areaSeries[i],n,pn,enough)).join("")}</div>
+  </section>`;
+
+  // Stat by stat
+  const recentGames=ms.slice(-n), priorGames=pn?ms.slice(-n-pn,-n):[];
+  const tiles=METRICS.map(m=>{
+    const b=a.base[m.key], mv=movement(b.vals,b.sign,n,pn);
+    const now=m.calc(recentGames), before=priorGames.length?m.calc(priorGames):null;
+    const allCls=enough?moveClass(mv.overallT):"flat";
+    return `<div class="tile"><span class="label">${m.label}</span><span class="val">${m.fmt(now)}</span>
+      ${deltaHTML(m,now,before,enough?mv.recentT:0)}<span class="was">${before!=null?"was "+m.fmt(before):"&nbsp;"}</span>
+      ${ms.length>2?`<span class="delta ${allCls}">All games ${arrow(mv.fit.start,mv.fit.end)} ${changeText(m,mv.fit.start,mv.fit.end)}</span>`:""}</div>`;
+  }).join("");
+  const firstT=ms[0].t,lastT=ms[ms.length-1].t;
+  const stats=`
+  <section class="block">
+    <div class="head"><h2>Stat by stat</h2><span class="label">Coloured moves are outside normal swings</span></div>
     <div class="tiles">${tiles}</div>
-    <div class="since">${ms.length} matches on record, ${fmtDateY(firstT)} to ${fmtDateY(lastT)}.</div>
+    <div class="since">${plural(ms.length,"game")} on record, ${fmtDateY(firstT)} to ${fmtDateY(lastT)}.</div>
+  </section>`;
+
+  // Strengths and weaknesses
+  const strengths=`
+  <section class="block">
+    <div class="head"><h2>Strengths and weaknesses</h2><span class="label" id="swSub"></span></div>
+    <div class="sw" id="strengths"></div>
   </section>`;
 
   // Trend
-  const tabs=["win","kda","spm","lhpm","deaths","kills"].map(k=>`<button class="tab" type="button" data-metric="${k}" aria-pressed="${k===state.trendMetric}">${M[k].label}</button>`).join("");
+  const tabs=["score","win","kda","spm","lhpm","deaths","kills"].map(k=>`<button class="tab" type="button" data-metric="${k}" aria-pressed="${k===state.trendMetric}">${M[k].label}</button>`).join("");
   const trend=`
   <section class="block">
     <div class="head"><h2>Trend</h2><div class="tabs" role="group" aria-label="Metric">${tabs}</div></div>
     <div class="chart" id="trendChart"></div>
   </section>`;
 
-  // Rank history
-  const rankBlock = state.mmr.length>1 ? `
+  // Per-match performance
+  const rows=ms.slice().reverse().slice(0,state.shown).map(m=>`<tr><td class="hero-c">${heroIcon(m.hero)}${esc(heroName(m.hero))}${m.abandoned?` <span class="label" style="color:var(--bad)">left</span>`:""}</td>
+      <td><span class="wl ${m.win?"w":"l"}">${m.win?"W":"L"}</span></td>
+      <td>${scoreHTML(m.score)}</td>
+      <td>${m.kills} / ${m.deaths} / ${m.assists}</td><td>${M.kda.fmt(M.kda.one(m))}</td>
+      <td>${M.spm.fmt(M.spm.one(m))}</td><td>${M.lhpm.fmt(M.lhpm.one(m))}</td><td>${m.denies}</td>
+      <td class="note">${noteHTML(m.best)}</td><td class="note">${noteHTML(m.worst)}</td>
+      <td>${dur(m.secs)}</td><td>${m.t?ago(m.t):"—"}</td></tr>`).join("");
+  const matchesBlock=`
   <section class="block">
-    <div class="head"><h2>Rank history</h2><span class="label">${state.mmr.length} ranked matches</span></div>
-    <div class="chart" id="rankChart"></div>
-  </section>` : "";
+    <div class="head"><h2>Match by match</h2><span class="label">Match score, last ${Math.min(40,ms.length)} games</span></div>
+    <div class="chart" id="matchChart"></div>
+    <div class="scroll"><table style="min-width:980px">
+      <thead><tr><th>Hero</th><th>Result</th><th title="50 is your own average">Score</th><th>K / D / A</th><th>KDA</th><th>Souls/min</th><th>LH/min</th><th>Denies</th><th title="The stat furthest above your average in this game">Best stat</th><th title="The stat furthest below your average in this game">Worst stat</th><th>Length</th><th>When</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    ${ms.length>state.shown?`<button class="btn ghost more" id="moreBtn" type="button">Show ${Math.min(20,ms.length-state.shown)} more</button>`:""}
+  </section>`;
 
   // Heroes
   const byHero={};
   for(const m of ms)(byHero[m.hero]??=[]).push(m);
-  const heroRows=Object.entries(byHero).sort((a,b)=>b[1].length-a[1].length||b[1].at(-1).t-a[1].at(-1).t).map(([id,list])=>{
+  const heroRows=Object.entries(byHero).sort((x,y)=>y[1].length-x[1].length||y[1].at(-1).t-x[1].at(-1).t).map(([id,list])=>{
     const half=Math.floor(list.length/2);
     let tr="<span class='delta flat'>—</span>";
-    if(list.length>=6){const a=M.spm.calc(list.slice(0,half)),b=M.spm.calc(list.slice(half));tr=deltaHTML(M.spm,b,a);}
+    if(list.length>=6){
+      const older=list.slice(0,half).map(m=>m.score), newer=list.slice(half).map(m=>m.score), d=Math.round(avg(newer)-avg(older));
+      tr=`<span class="delta ${moveClass(welchT(newer,older))}">${arrow(0,d)} ${signed(d)||"0"}</span>`;
+    }
     const form=list.slice(-5).map(m=>`<i class="${m.win?"w":""}" title="${m.win?"Win":"Loss"}"></i>`).join("");
-    const img=heroImg(id);
-    return `<tr><td class="hero">${heroIcon(id)}${esc(heroName(id))}</td>
+    return `<tr><td class="hero-c">${heroIcon(id)}${esc(heroName(id))}</td>
       <td>${list.length}</td><td>${M.win.fmt(M.win.calc(list))}</td><td>${M.kda.fmt(M.kda.calc(list))}</td>
-      <td>${M.spm.fmt(M.spm.calc(list))}</td><td>${tr}</td><td><span class="form">${form}</span></td><td>${ago(list.at(-1).t)}</td></tr>`;
+      <td>${M.spm.fmt(M.spm.calc(list))}</td><td>${scoreHTML(M.score.calc(list))}</td><td>${tr}</td><td><span class="form">${form}</span></td><td>${ago(list.at(-1).t)}</td></tr>`;
   }).join("");
   const heroes=`
   <section class="block">
     <div class="head"><h2>Heroes</h2><span class="label">${Object.keys(byHero).length} played</span></div>
     <div class="scroll"><table>
-      <thead><tr><th>Hero</th><th>Games</th><th>Win</th><th>KDA</th><th>Souls/min</th><th title="Souls per minute, second half of their games on this hero vs first half">Souls/min trend</th><th>Last 5</th><th>Last played</th></tr></thead>
+      <thead><tr><th>Hero</th><th>Games</th><th>Win</th><th>KDA</th><th>Souls/min</th><th>Score</th><th title="Match score, second half of your games on this hero vs the first half">Score trend</th><th>Last 5</th><th>Last played</th></tr></thead>
       <tbody>${heroRows}</tbody></table></div>
   </section>`;
 
-  // Matches
-  const recentList=ms.slice().reverse().slice(0,state.shown);
-  const rows=recentList.map(m=>{
-    const img=heroImg(m.hero);
-    return `<tr><td class="hero">${heroIcon(m.hero)}${esc(heroName(m.hero))}${m.abandoned?` <span class="label" style="color:var(--bad)">left</span>`:""}</td>
-      <td><span class="wl ${m.win?"w":"l"}">${m.win?"W":"L"}</span></td>
-      <td>${m.kills} / ${m.deaths} / ${m.assists}</td><td>${M.kda.fmt((m.kills+m.assists)/Math.max(1,m.deaths))}</td>
-      <td>${m.souls.toLocaleString()}</td><td>${Math.round(m.souls/m.mins).toLocaleString()}</td>
-      <td>${m.lastHits}</td><td>${dur(m.secs)}</td><td>${m.t?ago(m.t):"—"}</td></tr>`;
-  }).join("");
-  const matchesBlock=`
+  // Rank history
+  const rankBlock = state.rankHist.length>1 ? `
   <section class="block">
-    <div class="head"><h2>Match log</h2><span class="label">Newest first</span></div>
-    <div class="scroll"><table>
-      <thead><tr><th>Hero</th><th>Result</th><th>K / D / A</th><th>KDA</th><th>Souls</th><th>Souls/min</th><th>Last hits</th><th>Length</th><th>When</th></tr></thead>
-      <tbody>${rows}</tbody></table></div>
-    ${ms.length>state.shown?`<button class="btn ghost more" id="moreBtn" type="button">Show ${Math.min(20,ms.length-state.shown)} more</button>`:""}
-  </section>`;
+    <div class="head"><h2>Rank history</h2><span class="label">${state.rankHist.length.toLocaleString()} ranked matches</span></div>
+    <div class="chart" id="rankChart"></div>
+  </section>` : "";
 
-  app.innerHTML=plate+summary+trend+rankBlock+heroes+matchesBlock;
+  app.innerHTML=verdicts+`<div class="below">${plate+areas+stats+strengths+trend+matchesBlock+heroes+rankBlock}</div>`;
   bindPlate();
   document.getElementById("windowSel").onchange=e=>{state.windowN=+e.target.value;render();};
   const bc=document.getElementById("brawlChk"); if(bc) bc.onchange=e=>{state.includeBrawl=e.target.checked;render();};
   document.querySelectorAll("[data-metric]").forEach(b=>b.onclick=()=>{state.trendMetric=b.dataset.metric;render();});
   const mb=document.getElementById("moreBtn"); if(mb) mb.onclick=()=>{state.shown+=20;render();};
+  fillStrengths();
   drawTrend(ms);
-  if(state.mmr.length>1) drawRank();
+  drawMatchBars(ms);
+  if(state.rankHist.length>1) drawRank();
 }
 
 function bindPlate(){
@@ -532,13 +876,14 @@ function niceTicks(lo,hi,count=4){
   for(let v=start;v<=end+step/2;v+=step)ticks.push(+v.toFixed(6));
   return {ticks,lo:start,hi:end};
 }
+const rollWindow = n => Math.min(10,Math.max(3,Math.floor(n/5)));
 
-function lineChart(el,{xs,series,yFmt,yMin,yMax,tip,dates}){
-  const W=760,H=260,L=48,R=16,T=14,B=30;
+function lineChart(el,{xs,series,yFmt,yMin,yMax,ticks:fixedTicks,tip,dates}){
+  const W=760,H=260,L=58,R=16,T=14,B=30;
   const vals=series.flatMap(s=>s.values).filter(v=>v!=null&&isFinite(v));
   let lo=yMin??Math.min(...vals), hi=yMax??Math.max(...vals);
   const nt=niceTicks(lo,hi); lo=yMin??nt.lo; hi=yMax??nt.hi;
-  const ticks=(yMin!=null&&yMax!=null)?niceTicks(yMin,yMax).ticks.filter(t=>t>=yMin&&t<=yMax):nt.ticks;
+  const ticks=fixedTicks||((yMin!=null&&yMax!=null)?niceTicks(yMin,yMax).ticks.filter(t=>t>=yMin&&t<=yMax):nt.ticks);
   const n=xs.length, x=i=>L+(n<=1?0:(i/(n-1))*(W-L-R)), y=v=>T+(1-(v-lo)/((hi-lo)||1))*(H-T-B);
   let g=ticks.map(t=>`<line x1="${L}" x2="${W-R}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-width="1"/><text x="${L-8}" y="${y(t)+4}" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--data)">${yFmt(t)}</text>`).join("");
   const xi=[0,Math.floor((n-1)/3),Math.floor(2*(n-1)/3),n-1].filter((v,i,a)=>a.indexOf(v)===i&&v>=0);
@@ -553,8 +898,9 @@ function lineChart(el,{xs,series,yFmt,yMin,yMax,tip,dates}){
     if(s.end){const [a,b]=pts.at(-1);g+=`<circle cx="${a}" cy="${b}" r="4.5" fill="${s.color}" stroke="var(--panel)" stroke-width="2"/>`;}
   }
   g+=`<line id="hover-${el.id}" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--brass-dim)" stroke-dasharray="3 3" visibility="hidden"/>`;
-  const legend=series.filter(s=>s.name).map(s=>`<span><i style="background:${s.color}${s.dots?";height:6px;width:6px;border-radius:50%":""}"></i>${s.name}</span>`).join("");
-  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Chart">${g}</svg><div class="legend">${legend}</div><div class="tip" hidden></div>`;
+  const named=series.filter(s=>s.name);
+  const legend=named.length>1?`<div class="legend">${named.map(s=>`<span><i style="background:${s.color}${s.dots?";height:6px;width:6px;border-radius:50%":""}"></i>${s.name}</span>`).join("")}</div>`:"";
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Chart">${g}</svg>${legend}<div class="tip" hidden></div>`;
   const svg=el.querySelector("svg"), tipEl=el.querySelector(".tip"), hl=el.querySelector("#hover-"+el.id);
   const move=e=>{
     const r=svg.getBoundingClientRect(), px=(e.clientX-r.left)/r.width*W;
@@ -572,51 +918,92 @@ function lineChart(el,{xs,series,yFmt,yMin,yMax,tip,dates}){
 function drawTrend(ms){
   const el=document.getElementById("trendChart"), m=M[state.trendMetric];
   if(ms.length<2){el.innerHTML=`<div class="empty">Need at least two matches to draw a trend.</div>`;return;}
-  const w=Math.min(10,Math.max(3,Math.floor(ms.length/5)));
+  const w=rollWindow(ms.length);
   const rolling=ms.map((_,i)=>m.calc(ms.slice(Math.max(0,i-w+1),i+1)));
-  const per=ms.map(x=>m.key==="win"?null:m.calc([x]));
-  const isPct=m.key==="win";
+  const per=ms.map(x=>m.key==="win"?null:m.one(x));
+  const isPct=m.key==="win", isScore=m.key==="score";
   lineChart(el,{
     xs:ms, dates:ms.map(x=>x.t),
     series:[
-      ...(isPct?[]:[{name:"Single match",values:per,color:"var(--teal)",dots:true}]),
+      // Past a few hundred games the single-match dots merge into noise, so only the average stays.
+      ...(isPct||ms.length>300?[]:[{name:"Single match",values:per,color:"var(--muted)",dots:true}]),
       {name:`${w}-match average`,values:isPct?rolling.map(v=>v*100):rolling,color:"var(--brass)",width:2.5,area:true,end:true}
     ],
-    yMin:isPct?0:(m.key==="kda"||m.key==="deaths"||m.key==="kills"?0:undefined), yMax:isPct?100:undefined,
+    yMin:isPct||isScore?0:(m.key==="kda"||m.key==="deaths"||m.key==="kills"?0:undefined), yMax:isPct||isScore?100:undefined,
     yFmt:v=>isPct?v+"%":(m.key==="spm"?Math.round(v).toLocaleString():(+v.toFixed(1)).toString()),
     tip:i=>{const x=ms[i];return `<b>${esc(heroName(x.hero))}</b> · ${x.win?"Win":"Loss"} · ${x.t?fmtDateY(x.t):""}<br>${x.kills}/${x.deaths}/${x.assists} · ${Math.round(x.souls/x.mins)} souls/min<br>${w}-match ${m.label.toLowerCase()}: ${m.fmt(rolling[i])}`;}
   });
 }
 
+function drawMatchBars(ms){
+  const el=document.getElementById("matchChart"), list=ms.slice(-40), n=list.length;
+  const W=760,H=232,L=34,R=8,T=10,B=26,base=H-B;
+  const slot=(W-L-R)/Math.max(n,12), bw=Math.min(24,slot-2);
+  const y=v=>T+(1-v/100)*(base-T), mid=y(50);
+  let g=[0,50,100].map(v=>`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="${v===50?"var(--muted)":"var(--line)"}"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--data)">${v}</text>`).join("");
+  list.forEach((m,i)=>{
+    const x=L+i*slot+(slot-bw)/2, up=m.score>=50, h=Math.max(2,Math.abs(y(m.score)-mid)), r=Math.min(4,h,bw/2);
+    const tip=up?mid-h:mid+h, q=up?r:-r;
+    g+=`<path d="M${x} ${mid}V${tip+q}Q${x} ${tip} ${x+r} ${tip}H${x+bw-r}Q${x+bw} ${tip} ${x+bw} ${tip+q}V${mid}Z" fill="var(--${up?"good":"bad"})"/>`;
+    const cx=x+bw/2, cy=H-12;
+    g+=m.win?`<circle cx="${cx}" cy="${cy}" r="4" fill="var(--fg)"/>`:`<circle cx="${cx}" cy="${cy}" r="3.25" fill="none" stroke="var(--muted)" stroke-width="1.5"/>`;
+  });
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Match score for the last ${n} games. The table below has the same data.">${g}</svg>
+    <div class="legend"><span><i class="sq" style="background:var(--good)"></i>Above your average</span><span><i class="sq" style="background:var(--bad)"></i>Below your average</span><span><i class="dot"></i>Win</span><span><i class="ring"></i>Loss</span></div>
+    <div class="tip" hidden></div>`;
+  const svg=el.querySelector("svg"), tipEl=el.querySelector(".tip");
+  svg.addEventListener("pointermove",e=>{
+    const r=svg.getBoundingClientRect(), i=Math.floor(((e.clientX-r.left)/r.width*W-L)/slot);
+    if(i<0||i>=n){tipEl.hidden=true;return;}
+    const m=list[i];
+    tipEl.innerHTML=`<b>${esc(heroName(m.hero))}</b> · ${m.win?"Win":"Loss"} · ${m.t?fmtDateY(m.t):""}<br>Match score ${Math.round(m.score)}<br>${m.kills}/${m.deaths}/${m.assists} · ${Math.round(m.souls/m.mins)} souls/min`;
+    tipEl.hidden=false;
+    const er=el.getBoundingClientRect();
+    tipEl.style.left=Math.max(90,Math.min(er.width-90,r.left-er.left+(L+(i+.5)*slot)/W*r.width))+"px";
+    tipEl.style.top=(r.top-er.top+y(Math.max(m.score,50))/H*r.height-6)+"px";
+    if(parseFloat(tipEl.style.top)<70) tipEl.style.top="70px";
+  });
+  svg.addEventListener("pointerleave",()=>{tipEl.hidden=true;});
+}
+
 function drawRank(){
-  const el=document.getElementById("rankChart"), r=state.mmr;
+  const el=document.getElementById("rankChart"), r=state.rankHist;
+  const idx=r.map(x=>x.idx), loTier=Math.floor(Math.min(...idx)/6), hiTier=Math.floor(Math.max(...idx)/6)+1;
+  const step=Math.ceil((hiTier-loTier)/6), ticks=[];
+  for(let t=loTier;t<=hiTier;t+=step)ticks.push(t*6);
   lineChart(el,{
     xs:r, dates:r.map(x=>x.t),
-    series:[{name:"Rating after each ranked match",values:r.map(x=>x.score),color:"var(--brass)",width:2.5,area:true,end:true}],
-    yFmt:v=>(+v.toFixed(1)).toString(),
-    tip:i=>{const x=r[i];return `<b>${esc(x.tier!=null?rankLabel(x.tier,x.sub):"Rating")}</b> · ${fmtDateY(x.t)}<br>Rating ${(+x.score.toFixed(2))}`;}
+    series:[{name:"Rank after each ranked match",values:idx,color:"var(--brass)",width:2.5,area:true,end:true}],
+    yMin:loTier*6, yMax:hiTier*6, ticks,
+    yFmt:v=>{const t=v/6;return t<TIERS.length?rankLabel(t,0):"";},
+    tip:i=>{const x=r[i];return `<b>${esc(rankLabel(x.tier,x.sub))}</b> · ${fmtDateY(x.t)}`;}
   });
 }
 
 /* ---------- demo ---------- */
 function demo(){
   let seed=7; const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
-  const pool=[1,7,13,15,20,52,58,6];
-  const now=Math.floor(Date.now()/1000), ms=[], mmr=[]; let score=8.2;
-  for(let i=0;i<84;i++){
-    const skill=0.35+0.4*(i/83), mins=26+rnd()*16, hero=pool[Math.floor(Math.pow(rnd(),1.6)*pool.length)];
-    const win=rnd()<0.36+skill*0.35, t=now-(84-i)*3600*16-Math.floor(rnd()*7200);
+  const pool=[1,7,13,15,20,52,58,6], N=120;
+  const now=Math.floor(Date.now()/1000), ms=[]; let rating=30;
+  for(let i=0;i<N;i++){
+    // A long climb, then a slump over the last couple of dozen games: down recently, still up overall.
+    const skill=i<96?0.3+0.45*(i/95):0.75-0.55*((i-95)/(N-96));
+    const mins=26+rnd()*16, hero=pool[Math.floor(Math.pow(rnd(),1.6)*pool.length)];
+    const win=rnd()<0.36+skill*0.35, t=now-(N-i)*3600*16-Math.floor(rnd()*7200);
     const kills=Math.round(3+skill*9*rnd()+rnd()*3), deaths=Math.round(9-skill*6+rnd()*4), assists=Math.round(8+skill*10*rnd()+rnd()*5);
     const spm=800+skill*700+rnd()*260;
-    ms.push({id:1e8+i,t,hero,win,kills,deaths,assists,souls:Math.round(spm*mins),lastHits:Math.round((3+skill*4+rnd())*mins),denies:Math.round(rnd()*6+skill*8),secs:mins*60,mins,abandoned:false,brawl:false});
-    score+= (win?0.09:-0.07)+(rnd()-0.5)*0.03;
-    mmr.push({t,score:+score.toFixed(2),tier:Math.min(11,Math.floor(score/2.5)+1),sub:Math.min(6,Math.max(1,Math.floor((score%2.5)/2.5*6)+1)),id:1e8+i});
+    rating+=win?0.5:-0.4;
+    const idx=Math.round(rating), tier=Math.floor(idx/6), sub=idx%6+1;
+    ms.push({id:1e8+i,t,hero,win,kills,deaths,assists,souls:Math.round(spm*mins),lastHits:Math.round((3+skill*4+rnd())*mins),denies:Math.round(rnd()*6+skill*8),secs:mins*60,mins,abandoned:false,brawl:false,practice:false,badge:tier*10+sub});
   }
-  const lastR=mmr.at(-1);
+  const rows={};
+  for(const h of pool) rows[h]={kills:{avg:6.1,std:3.9},deaths:{avg:6.2,std:3.1},assists:{avg:12.4,std:6.5},denies:{avg:5.5,std:3.2},last_hits:{avg:165,std:59},net_worth:{avg:40000,std:11500},net_worth_per_min:{avg:1130,std:185},kda:{avg:4.8,std:5.4}};
+  const lastBadge=ms.at(-1).badge;
   state.demo=true;
-  state.player={accountId:0,name:"Example player",avatar:"",profileUrl:"#",last30:null,tier:lastR.tier,sub:lastR.sub,
-    snaps:[{t:now-60*86400,tier:mmr[0].tier,sub:mmr[0].sub}]};
-  state.matches=ms; state.mmr=mmr;
+  state.player={accountId:0,name:"Example player",avatar:"",profileUrl:"#",last30:null,tier:Math.floor(lastBadge/10),sub:lastBadge%10,
+    snaps:[{t:now-60*86400,tier:Math.floor(ms[0].badge/10),sub:ms[0].badge%10}]};
+  state.matches=ms; state.rankHist=rankHistory(ms); state.bench={rows}; state.shown=20; state.reveal=true;
+  setStatus(null);
   render();
 }
 
@@ -627,7 +1014,7 @@ async function track(accountId,force){
   catch(e){
     let msg;
     if(e.message==="network") msg="Couldn't reach the Deadlock API. Check your connection and try again. If the API is down, its status is shown on deadlock-api.com.";
-    else if(e.status===404) msg=`The API has no record of account ${accountId}. Double-check the ID, or try again once they've played a match.`;
+    else if(e.status===404||e.status===400) msg=`The API has no record of account ${accountId}. Double-check the ID, or try again after playing a match.`;
     else if(e.status===429) msg="The API is rate-limiting requests right now. Wait a minute and try again.";
     else msg=`The API returned an error (${esc(e.message)}). Try again in a moment.`;
     setStatus(msg,true);
@@ -642,8 +1029,9 @@ document.getElementById("lookup").addEventListener("submit",async e=>{
   if(parsed.accountId!=null){ if(parsed.accountId<=0){setStatus("That doesn't look like a valid Steam ID.",true);return;} return track(parsed.accountId); }
   setStatus(`<span class="spin"></span>Searching for “${esc(parsed.query)}”…`);
   try{ const id=await resolveQuery(parsed.query); track(id); }
-  catch(err){ setStatus(`Couldn't find a player called “${esc(parsed.query)}”. Paste their SteamID64 instead: open their Steam profile, and if the URL ends in a name, look the name up on steamid.io to get the 17-digit number.`,true); }
+  catch(err){ setStatus(`Couldn't find a player called “${esc(parsed.query)}”. Paste the SteamID64 instead: open the Steam profile, and if the URL ends in a name, look the name up on steamid.io to get the 17-digit number.`,true); }
 });
+document.getElementById("demoBtn").addEventListener("click",demo);
 document.getElementById("friends").addEventListener("click",e=>{
   const f=e.target.closest("[data-forget]"); if(f){e.stopPropagation();forgetFriend(+f.dataset.forget);return;}
   const c=e.target.closest("[data-id]"); if(c) track(+c.dataset.id);
@@ -653,10 +1041,11 @@ document.getElementById("friends").addEventListener("keydown",e=>{
 });
 
 (async function init(){
-  renderFriends();
+  render();
   const last=load("dlp.last",null);
-  ensureAssets().then(()=>{ if(state.player) render(); });
-  if(last){ track(last); } else { demo(); }
+  // Hero and rank art can land after the example renders. Wait for any reveal to finish before redrawing.
+  ensureAssets().then(()=>{ if(state.player) setTimeout(render,Math.max(0,state.revealUntil-Date.now())); });
+  if(last) track(last);
 })();
 </script>
 </body>
